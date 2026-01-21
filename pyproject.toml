@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "Pyntb"
-version = "2025.0.3"
+version = "2026.1.0"
 authors = [
     { name = "Mews Labs", email = "emmanuel.cieren@mews-labs.com" },
 ]
