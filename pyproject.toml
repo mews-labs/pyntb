@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "Pyntb"
-version = "2026.1.0"
+version = "2026.1.1"
 authors = [
     { name = "Mews Labs", email = "emmanuel.cieren@mews-labs.com" },
 ]
@@ -18,14 +18,17 @@ classifiers = [
 ]
 dependencies = [
     "numpy >= 2.0.1",
-    "scipy >= 1.16.0",
 ]
 
 [project.optional-dependencies]
-examples = ["matplotlib", "scikit-learn"]
+examples = ["matplotlib", "scikit-learn", "scipy"]
 test = ["pytest", "scikit-learn", "pylint"]
-lint = ["black"]
+lint = ["ruff"]
 dev = ["pyntb[examples,test,lint]"]
 
 [project.urls]
-"Homepage" = "https://github.com/eurobios-mews-labs/pyntb"
+"Homepage" = "https://github.com/mews-labs/pyntb"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
