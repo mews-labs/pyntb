@@ -18,8 +18,6 @@
 import warnings
 
 import numpy as np
-from scipy._lib._util import _asarray_validated
-from scipy._lib.array_api_extra import apply_where
 
 
 def bisect_v(
@@ -90,6 +88,30 @@ def bisect_v(
     return x, err
 
 
+def _apply_where(cond, arrays, func, fill_value):
+    """Evaluate ``func`` only where ``cond`` is True, using ``fill_value``
+    elsewhere.
+
+    NumPy-only replacement for the ``apply_where`` helper that used to live in
+    ``scipy._lib.array_api_extra`` (removed in scipy 1.18.0). Only the elements
+    selected by ``cond`` are passed to ``func``, so masked-out entries never
+    trigger warnings or errors (e.g. division by zero).
+    """
+    cond = np.asarray(cond)
+    arrays = tuple(np.asarray(arr) for arr in arrays)
+    fill_value = np.asarray(fill_value)
+    shape = np.broadcast_shapes(
+        cond.shape, fill_value.shape, *(arr.shape for arr in arrays)
+    )
+    cond = np.broadcast_to(cond, shape)
+    arrays = tuple(np.broadcast_to(arr, shape) for arr in arrays)
+    dtype = np.result_type(fill_value, *arrays)
+    out = np.array(np.broadcast_to(fill_value, shape), dtype=dtype)
+    selected = tuple(np.extract(cond, arr) for arr in arrays)
+    np.place(out, cond, func(*selected))
+    return out
+
+
 def _del2(p0, p1, d):
     return p0 - np.square(p1 - p0) / d
 
@@ -115,10 +137,10 @@ def _fixed_point_helper(func, x0, args, xtol, maxiter, use_accel):
         if use_accel:
             p2 = func(p1, *args)
             d = p2 - 2.0 * p1 + p0
-            p = apply_where(d != 0, (p0, p1, d), _del2, fill_value=p2)
+            p = _apply_where(d != 0, (p0, p1, d), _del2, fill_value=p2)
         else:
             p = p1
-        relerr = apply_where(p0 != 0, (p, p0), _relerr, fill_value=p)
+        relerr = _apply_where(p0 != 0, (p, p0), _relerr, fill_value=p)
         if np.nanmax(np.abs(relerr)) < xtol:
             return p
         p0 = p
@@ -159,7 +181,9 @@ def fixed_point(func, x0, args=(), xtol=1e-8, maxiter=500, method="del2"):
 
     """
     use_accel = {"del2": True, "iteration": False}[method]
-    x0 = _asarray_validated(x0, as_inexact=True)
+    x0 = np.asarray_chkfinite(x0)
+    if not np.issubdtype(x0.dtype, np.inexact):
+        x0 = x0.astype(np.float64)
     return _fixed_point_helper(func, x0, args, xtol, maxiter, use_accel)
 
 

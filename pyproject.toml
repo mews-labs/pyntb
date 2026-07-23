@@ -18,14 +18,13 @@ classifiers = [
 ]
 dependencies = [
     "numpy >= 2.0.1",
-    "scipy >= 1.16.0",
 ]
 
 [project.optional-dependencies]
-examples = ["matplotlib", "scikit-learn"]
+examples = ["matplotlib", "scikit-learn", "scipy"]
 test = ["pytest", "scikit-learn", "pylint"]
 lint = ["black"]
 dev = ["pyntb[examples,test,lint]"]
 
 [project.urls]
-"Homepage" = "https://github.com/eurobios-mews-labs/pyntb"
+"Homepage" = "https://github.com/mews-labs/pyntb"

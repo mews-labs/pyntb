@@ -1,4 +1,4 @@
-# Eurobios-Mews-Labs Toolbox
+# Mews-Labs Numeric Toolbox
 
 A toolbox to factorize some code utilities across various projects.
 
